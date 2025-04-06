@@ -1,0 +1,5 @@
+upstream my-service {
+{{ range service "my-service" }}
+    server {{ .Address }}:{{ .Port }};
+{{ end }}
+}

@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  consul:
+    image: consul:1.15
+    container_name: consul
+    ports:
+      - "8500:8500"
+    volumes:
+      - ./consul/config.json:/consul/config/config.json
+    command: "agent -config-file=/consul/config/config.json"
+
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - consul
+  
+  my-service-1:
+    build:
+      context: ./aspnet-app
+      dockerfile: Dockerfile
+    container_name: my-service-1
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - consul
+
+  my-service-2:
+    build:
+      context: ./aspnet-app
+      dockerfile: Dockerfile
+    container_name: my-service-2
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - consul
+
+  my-service-3:
+    build:
+      context: ./aspnet-app
+      dockerfile: Dockerfile
+    container_name: my-service-3
+    environment:
+      - ASPNETCORE_URLS=http://+:80
+    depends_on:
+      - consul
