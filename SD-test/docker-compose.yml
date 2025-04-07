@@ -6,6 +6,11 @@ services:
     container_name: consul
     ports:
       - "8500:8500"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8500/v1/status/leader"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
     volumes:
       - ./consul/config.json:/consul/config/config.json
     command: "agent -config-file=/consul/config/config.json"

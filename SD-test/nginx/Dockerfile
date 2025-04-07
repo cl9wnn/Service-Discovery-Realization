@@ -1,9 +1,11 @@
 FROM nginx:latest
 
-RUN apt-get update && apt-get install -y curl unzip && \
-    curl -LO https://releases.hashicorp.com/consul-template/0.30.0/consul-template_0.30.0_linux_amd64.zip && \
-    unzip consul-template_0.30.0_linux_amd64.zip -d /usr/local/bin && \
-    rm consul-template_0.30.0_linux_amd64.zip
+RUN apt-get update && apt-get install -y unzip
+
+COPY consul-template_0.40.0_linux_amd64.zip /tmp/consul-template.zip
+
+RUN unzip /tmp/consul-template.zip -d /usr/local/bin && \
+    rm /tmp/consul-template.zip
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY templates/ /etc/nginx/templates/

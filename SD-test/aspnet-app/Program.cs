@@ -3,14 +3,12 @@ using System.Net;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -20,7 +18,6 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 app.MapControllers();
 
-// Consul Registration
 var consulClient = new ConsulClient(c => c.Address = new Uri("http://consul:8500"));
 var registration = new AgentServiceRegistration()
 {
@@ -33,7 +30,7 @@ var registration = new AgentServiceRegistration()
         HTTP = $"http://{Dns.GetHostName()}:80/health",
         Interval = TimeSpan.FromSeconds(30),
         Timeout = TimeSpan.FromSeconds(5),
-        DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30)
+        DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(2)
     }
 };
 
