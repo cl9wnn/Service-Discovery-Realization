@@ -23,7 +23,7 @@ var registration = new AgentServiceRegistration()
 {
     ID = $"my-service-{Guid.NewGuid()}",
     Name = "my-service",
-    Address = Dns.GetHostName(),
+    Address = GetLocalIpAddress(),
     Port = 80,
     Check = new AgentServiceCheck()
     {
@@ -44,3 +44,17 @@ app.Lifetime.ApplicationStopping.Register(async () =>
 app.MapGet("/health", () => Results.Ok("Healthy"));
 
 app.Run();
+return;
+
+string GetLocalIpAddress()
+{
+    var host = Dns.GetHostEntry(Dns.GetHostName());
+    foreach (var ip in host.AddressList)
+    {
+        if (ip.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+        {
+            return ip.ToString();
+        }
+    }
+    throw new Exception("No network adapters with an IPv4 address in the system!");
+}
