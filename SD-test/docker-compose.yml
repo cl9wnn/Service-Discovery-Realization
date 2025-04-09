@@ -21,13 +21,13 @@ services:
     ports:
       - "8080:80"
     depends_on:
-      - consul
-  
+      consul:
+        condition: service_healthy
+
   my-service-1:
     build:
       context: ./aspnet-app
       dockerfile: Dockerfile
-    container_name: my-service-1
     environment:
       - ASPNETCORE_URLS=http://+:80
     depends_on:
@@ -37,7 +37,6 @@ services:
     build:
       context: ./aspnet-app
       dockerfile: Dockerfile
-    container_name: my-service-2
     environment:
       - ASPNETCORE_URLS=http://+:80
     depends_on:
@@ -47,7 +46,6 @@ services:
     build:
       context: ./aspnet-app
       dockerfile: Dockerfile
-    container_name: my-service-3
     environment:
       - ASPNETCORE_URLS=http://+:80
     depends_on:

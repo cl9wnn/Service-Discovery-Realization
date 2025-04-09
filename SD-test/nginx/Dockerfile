@@ -1,14 +1,12 @@
-FROM nginx:latest
+# Используем официальный образ Nginx
+FROM nginx:1.23-alpine
 
-RUN apt-get update && apt-get install -y unzip
+# Удаляем дефолтную конфигурацию
+RUN rm /etc/nginx/conf.d/default.conf
 
-COPY consul-template_0.40.0_linux_amd64.zip /tmp/consul-template.zip
-
-RUN unzip /tmp/consul-template.zip -d /usr/local/bin && \
-    rm /tmp/consul-template.zip
-
+# Копируем нашу кастомную конфигурацию
 COPY nginx.conf /etc/nginx/nginx.conf
-COPY templates/ /etc/nginx/templates/
-COPY consul-template.conf /etc/consul-template/consul-template.conf
 
-CMD ["sh", "-c", "consul-template -config=/etc/consul-template/consul-template.conf & nginx -g 'daemon off;'"]
+# Добавляем healthcheck для Docker
+HEALTHCHECK --interval=5s --timeout=3s \
+  CMD curl -f http://localhost/health || exit 1

@@ -43,6 +43,11 @@ app.Lifetime.ApplicationStopping.Register(async () =>
 
 app.MapGet("/health", () => Results.Ok("Healthy"));
 
+app.Use(async (context, next) => {
+    context.Response.Headers.Append("X-Service-Id", registration.ID);
+    await next();
+});
+
 app.Run();
 return;
 
