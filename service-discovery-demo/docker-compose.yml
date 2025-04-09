@@ -26,7 +26,7 @@ services:
 
   my-service-1:
     build:
-      context: ./aspnet-app
+      context: ./webApp
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_URLS=http://+:80
@@ -35,7 +35,7 @@ services:
 
   my-service-2:
     build:
-      context: ./aspnet-app
+      context: ./webApp
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_URLS=http://+:80
@@ -44,7 +44,7 @@ services:
 
   my-service-3:
     build:
-      context: ./aspnet-app
+      context: ./webApp
       dockerfile: Dockerfile
     environment:
       - ASPNETCORE_URLS=http://+:80

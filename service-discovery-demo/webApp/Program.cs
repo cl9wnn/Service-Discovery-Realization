@@ -15,7 +15,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseAuthorization();
 app.MapControllers();
 
 var consulClient = new ConsulClient(c => c.Address = new Uri("http://consul:8500"));
@@ -25,7 +24,7 @@ var registration = new AgentServiceRegistration()
     Name = "my-service",
     Address = GetLocalIpAddress(),
     Port = 80,
-    Check = new AgentServiceCheck()
+    Check = new AgentServiceCheck
     {
         HTTP = $"http://{Dns.GetHostName()}:80/health",
         Interval = TimeSpan.FromSeconds(30),
