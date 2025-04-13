@@ -9,7 +9,6 @@ public class ServiceMappingProfile : Profile
     public ServiceMappingProfile()
     {
         CreateMap<AddServiceRequest, ServiceInfo>()
-            .ForMember(x => x.RegisteredAt, 
-                y => y.MapFrom(_ => DateTime.UtcNow));
+            .ForMember(x => x.RegisteredAt, y => y.MapFrom(_ => DateTime.UtcNow));
     }
 }

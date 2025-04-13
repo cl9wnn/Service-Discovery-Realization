@@ -8,7 +8,7 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
     {
         try
         {
-            await next(context); 
+            await next(context);
         }
         catch (Exception ex)
         {
@@ -19,9 +19,10 @@ public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<Exception
 
             var result = JsonSerializer.Serialize(new
             {
-                error = "An unexpected error occurred"
+                error = "An unexpected error occurred..."
             });
 
+            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
             await context.Response.WriteAsync(result);
         }
     }

@@ -1,3 +1,4 @@
+using System.Reflection;
 using API.Features.Services.AddServiceArea;
 using API.Features.Services.DeleteServiceArea;
 using API.Features.Services.GetAllServicesArea;
@@ -19,14 +20,14 @@ public static class ApiExtensions
 
         return group;
     }
-    
+
     public static IServiceCollection AddMappings(this IServiceCollection services)
     {
-        services.AddAutoMapper(typeof(ServiceCollectionExtensions).Assembly); 
+        services.AddAutoMapper(Assembly.GetExecutingAssembly());
 
         return services;
     }
-    
+
     public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
     {
         return app.UseMiddleware<ExceptionHandlingMiddleware>();

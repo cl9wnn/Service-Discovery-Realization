@@ -1,20 +1,55 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// TODO: Динамически подтягивать порт SD
+builder.Services.AddHttpClient("ServiceRegistry", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:5100"); // Адрес SD
+});
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+using (var scope = app.Services.CreateScope())
+{
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
+    var httpClient = httpClientFactory.CreateClient("ServiceRegistry");
+    
+    // TODO: Динамически подтягивать порт приложения
+    var serviceData = new 
+    {
+        Id = Guid.NewGuid(),
+        Endpoint = "http://localhost:5101/weatherforecast"
+    };
+    
+    try
+    {
+        var response = await httpClient.PostAsJsonAsync("/services", serviceData);
+        
+        if (!response.IsSuccessStatusCode)
+        {
+            logger.LogError("Ошибка регистрации приложения: {response.StatusCode}", response.StatusCode);
+            Environment.Exit(1);
+        }
+        else
+        {
+            logger.LogInformation("Сервис успешно зарегистрирован");
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogCritical(ex, "Критическая ошибка при регистрации сервиса");
+        Environment.Exit(1);
+    }
+}
 
 var summaries = new[]
 {
