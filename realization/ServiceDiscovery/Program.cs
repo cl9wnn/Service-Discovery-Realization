@@ -18,6 +18,8 @@ if (app.Environment.IsDevelopment())
 
 app.MapGroup("/services")
     .MapServicesApi()
-    .WithTags("Public"); 
+    .WithTags("Public");
+
+app.UseGlobalExceptionHandler();
 
 app.Run();

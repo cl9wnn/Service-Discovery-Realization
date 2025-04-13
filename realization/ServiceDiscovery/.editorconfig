@@ -1,0 +1,19 @@
+root = true
+
+[*.cs]
+# Отступы
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+dotnet_diagnostic.SA1600.severity = none       
+dotnet_diagnostic.SA1309.severity = warning    
+dotnet_diagnostic.SA1101.severity = none     
+dotnet_diagnostic.SA1300.severity = error   
+
+dotnet_diagnostic.SA1210.severity = none       
+dotnet_diagnostic.SA1208.severity = none      
+dotnet_diagnostic.SA1200.severity = none  
+
+dotnet_diagnostic.SA1106.severity = none
