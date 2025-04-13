@@ -3,6 +3,7 @@ using API.Features.Services.DeleteServiceArea;
 using API.Features.Services.GetAllServicesArea;
 using API.Features.Services.GetServiceArea;
 using API.Features.Services.UpdateServiceArea;
+using API.Middlewares;
 
 namespace API;
 
@@ -17,5 +18,17 @@ public static class ApiExtensions
         group.MapDelete("/{id:guid}", DeleteService.Handle);
 
         return group;
+    }
+    
+    public static IServiceCollection AddMappings(this IServiceCollection services)
+    {
+        services.AddAutoMapper(typeof(ServiceCollectionExtensions).Assembly); 
+
+        return services;
+    }
+    
+    public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
+    {
+        return app.UseMiddleware<ExceptionHandlingMiddleware>();
     }
 }

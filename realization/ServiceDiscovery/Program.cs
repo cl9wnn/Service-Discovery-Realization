@@ -1,9 +1,12 @@
 using API;
+using API.ServiceRegistry;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSingleton<IServiceRegistry, InMemoryServiceRegistry>();
+builder.Services.AddMappings();
 
 var app = builder.Build();
 
