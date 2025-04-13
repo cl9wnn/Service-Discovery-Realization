@@ -27,7 +27,8 @@ using (var scope = app.Services.CreateScope())
     var serviceData = new 
     {
         Id = Guid.NewGuid(),
-        Endpoint = "http://localhost:5101/weatherforecast"
+        Area = "weatherforecast",
+        Port = 5101
     };
     
     try
@@ -56,7 +57,7 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/weatherforecast", () =>
+app.MapGet("/", () =>
     {
         var forecast = Enumerable.Range(1, 5).Select(index =>
                 new WeatherForecast
@@ -70,6 +71,8 @@ app.MapGet("/weatherforecast", () =>
     })
     .WithName("GetWeatherForecast")
     .WithOpenApi();
+
+app.MapGet("/health", () => StatusCodes.Status200OK);
 
 app.Run();
 

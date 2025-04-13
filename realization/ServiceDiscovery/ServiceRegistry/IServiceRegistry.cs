@@ -4,13 +4,16 @@ namespace API.ServiceRegistry;
 
 public interface IServiceRegistry
 {
-    void Register(ServiceInfo service);
+    Task RegisterAsync(ServiceInfo service);
 
-    bool TryGet(Guid id, out ServiceInfo service);
+    // TODO: Подумать куда вставить Round-Robin
+    Task<ServiceInfo?> TryGetByAreaAsync(string area);
 
-    ICollection<ServiceInfo> GetAll();
+    Task<ICollection<ServiceInfo>> GetAllAsync();
 
-    bool Unregister(Guid id);
+    Task<bool> UnregisterAsync(Guid id);
 
-    bool Update(ServiceInfo service);
+    Task<bool> UpdateAsync(ServiceInfo service);
+
+    Task<ServiceInfo?> GetByIdAsync(Guid id);
 }

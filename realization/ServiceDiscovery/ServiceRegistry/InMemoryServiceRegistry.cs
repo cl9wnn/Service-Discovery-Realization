@@ -3,32 +3,80 @@ using API.Models;
 
 namespace API.ServiceRegistry;
 
-public class InMemoryServiceRegistry: IServiceRegistry
+public class InMemoryServiceRegistry : IServiceRegistry
 {
-    private readonly ConcurrentDictionary<Guid, ServiceInfo> _services = new();
+    private readonly ConcurrentDictionary<string, ConcurrentDictionary<Guid, ServiceInfo>> _services = new ();
 
-    public void Register(ServiceInfo service)
+    public async Task RegisterAsync(ServiceInfo service)
     {
-        _services[service.Id] = service;
+        var areaServices = _services
+            .GetOrAdd(service.Area, _ => new ConcurrentDictionary<Guid, ServiceInfo>());
+
+        areaServices[service.Id] = service;
     }
 
-    public bool TryGet(Guid id, out ServiceInfo service)
+    public async Task<ServiceInfo?> TryGetByAreaAsync(string area)
     {
-        return _services.TryGetValue(id, out service!);
+        if (!_services.TryGetValue(area, out var areaServices))
+        {
+            return null;
+        }
+
+        var service = areaServices.FirstOrDefault().Value;
+        return service;
     }
 
-    public ICollection<ServiceInfo> GetAll()
+    public async Task<ICollection<ServiceInfo>> GetAllAsync()
     {
-        return _services.Values;
+        return _services.Values
+            .SelectMany(area => area.Values)
+            .ToList();
     }
 
-    public bool Unregister(Guid id)
+    public async Task<bool> UnregisterAsync(Guid id)
     {
-        return _services.TryRemove(id, out _);
+        foreach (var area in _services.Values)
+        {
+            if (!area.TryRemove(id, out _))
+            {
+                continue;
+            }
+
+            if (!area.IsEmpty)
+            {
+                return true;
+            }
+
+            var areaName = _services.FirstOrDefault(x => x.Value == area).Key;
+            _services.TryRemove(areaName, out _);
+
+            return true;
+        }
+
+        return false;
     }
 
-    public bool Update(ServiceInfo service)
+    public async Task<bool> UpdateAsync(ServiceInfo service)
     {
-        return _services.TryUpdate(service.Id, service, _services[service.Id]);
+        if (!_services.TryGetValue(service.Area, out var areaServices))
+        {
+            return false;
+        }
+
+        return areaServices.TryGetValue(service.Id, out var oldService) &&
+               areaServices.TryUpdate(service.Id, service, oldService);
+    }
+
+    public async Task<ServiceInfo?> GetByIdAsync(Guid id)
+    {
+        foreach (var area in _services.Values)
+        {
+            if (area.TryGetValue(id, out var service))
+            {
+                return service;
+            }
+        }
+
+        return null;
     }
 }

@@ -17,7 +17,7 @@ public class AddService
 
         var service = mapper.Map<ServiceInfo>(request);
 
-        registry.Register(service);
+        await registry.RegisterAsync(service);
 
         return Results.Ok(service);
     }
