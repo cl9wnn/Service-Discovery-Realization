@@ -9,4 +9,6 @@ public class ServiceInfo
     public int Port { get; set; }
 
     public DateTime RegisteredAt { get; set; }
+
+    public DateTime UpdatedAt { get; set; }
 }
