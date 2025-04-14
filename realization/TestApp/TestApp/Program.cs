@@ -1,3 +1,5 @@
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -72,7 +74,11 @@ app.MapGet("/", () =>
     .WithName("GetWeatherForecast")
     .WithOpenApi();
 
-app.MapGet("/health", () => StatusCodes.Status200OK);
+app.MapGet("/health", async (HttpContext context) =>
+{
+    await context.Response.Body.WriteAsync("healthy!"u8.ToArray());
+    return Results.Ok("OK");
+});
 
 app.Run();
 
