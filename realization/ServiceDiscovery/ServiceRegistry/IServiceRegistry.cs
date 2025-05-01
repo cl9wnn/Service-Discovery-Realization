@@ -6,8 +6,7 @@ public interface IServiceRegistry
 {
     Task RegisterAsync(ServiceInfo service);
 
-    // TODO: Подумать куда вставить Round-Robin
-    Task<ServiceInfo?> TryGetByAreaAsync(string area);
+    Task<ICollection<ServiceInfo>?> TryGetByAreaAsync(string area);
 
     Task<ICollection<ServiceInfo>> GetAllAsync();
 

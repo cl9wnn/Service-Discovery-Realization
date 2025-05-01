@@ -15,15 +15,11 @@ public class InMemoryServiceRegistry : IServiceRegistry
         areaServices[service.Id] = service;
     }
 
-    public async Task<ServiceInfo?> TryGetByAreaAsync(string area)
+    public async Task<ICollection<ServiceInfo>?> TryGetByAreaAsync(string area)
     {
-        if (!_services.TryGetValue(area, out var areaServices))
-        {
-            return null;
-        }
-
-        var service = areaServices.FirstOrDefault().Value;
-        return service;
+        return !_services.TryGetValue(area, out var areaServices)
+            ? null
+            : areaServices.Values;
     }
 
     public async Task<ICollection<ServiceInfo>> GetAllAsync()
