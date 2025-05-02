@@ -30,14 +30,17 @@ public class HealthChecker(
             var client = httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(10);
 
+            logger.LogInformation($"Начинается проверка реплики http://{service.Host}:{service.Port}/health");
             var healthCheckUrl = $"http://{service.Host}:{service.Port}/health";
             var response = await client.GetAsync(healthCheckUrl);
 
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogWarning($"Сервис {service.Id} на порту {service.Port} неработоспособен. Код статуса: {response.StatusCode}");
+                logger.LogWarning($"Сервис {service.Id} на порту {service.Port} неработоспособен. Код: {response.StatusCode}");
                 await serviceRegistry.UnregisterAsync(service.Id);
             }
+
+            logger.LogInformation($"Сервис {service.Id} на порту {service.Port} успешно работает. Код: {response.StatusCode}");
         }
         catch (Exception ex)
         {

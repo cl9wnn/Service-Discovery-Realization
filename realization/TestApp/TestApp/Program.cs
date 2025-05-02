@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
@@ -54,6 +56,11 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapGet("/health", () => Results.Ok("healthy!"));
+app.MapGet("/health", (ILogger<Program> logger) =>
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5103";
+    logger.LogInformation($"Запрос отработал на {port}");
+    return Results.Ok("healthy!");
+});
 
 app.Run();

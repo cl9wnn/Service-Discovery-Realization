@@ -1,0 +1,71 @@
+services:
+  service-discovery:
+    build:
+        context: ./ServiceDiscovery
+        dockerfile: Dockerfile
+    container_name: service-discovery
+    hostname: service-discovery
+    ports:
+      - "5100:5100" # Внешний порт:внутренний
+    environment:
+      - ASPNETCORE_URLS=http://*:5100
+      - PORT=5100
+    networks:
+      - app-network
+
+  api-gateway:
+    build:
+      context: ./ApiGateway
+      dockerfile: ApiGateway/Dockerfile
+    container_name: api-gateway
+    hostname: api-gateway
+    depends_on:
+      - service-discovery
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_URLS=http://*:8080
+      - PORT=8080
+      - SD_URL=http://service-discovery:5100
+    networks:
+      - app-network
+
+  test-app:
+    build:
+      context: ./TestApp
+      dockerfile: TestApp/Dockerfile
+    container_name: test-app
+    hostname: weather-service
+    depends_on:
+      - service-discovery
+    ports:
+      - "5103:5103"
+    environment:
+      - ASPNETCORE_URLS=http://*:5103
+      - PORT=5103
+      - SD_URL=http://service-discovery:5100
+      - SERVICE_HOST=weather-service
+    networks:
+      - app-network
+
+  test-app2:
+    build:
+      context: ./TestApp
+      dockerfile: TestApp/Dockerfile
+    container_name: test-app2
+    hostname: weather-service
+    depends_on:
+      - service-discovery
+    ports:
+      - "5104:5104"
+    environment:
+      - ASPNETCORE_URLS=http://*:5104
+      - PORT=5104
+      - SD_URL=http://service-discovery:5100
+      - SERVICE_HOST=weather-service
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
