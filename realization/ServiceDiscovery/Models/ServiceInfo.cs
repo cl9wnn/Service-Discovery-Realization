@@ -6,6 +6,8 @@ public class ServiceInfo
 
     public string Area { get; set; }
 
+    public string Host { get; set; }
+
     public int Port { get; set; }
 
     public DateTime RegisteredAt { get; set; }

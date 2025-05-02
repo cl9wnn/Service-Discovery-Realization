@@ -30,8 +30,7 @@ public class HealthChecker(
             var client = httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(10);
 
-            // TODO: хардкод
-            var healthCheckUrl = $"http://localhost:{service.Port}/health";
+            var healthCheckUrl = $"http://{service.Host}:{service.Port}/health";
             var response = await client.GetAsync(healthCheckUrl);
 
             if (!response.IsSuccessStatusCode)

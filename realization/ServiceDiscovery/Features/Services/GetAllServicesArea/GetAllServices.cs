@@ -3,7 +3,7 @@ using AutoMapper;
 
 namespace API.Features.Services.GetAllServicesArea;
 
-public class GetAllServices()
+public class GetAllServices
 {
     public static async Task<IResult> Handle(string area, HttpContext context, IServiceRegistry registry, IMapper mapper)
     {
