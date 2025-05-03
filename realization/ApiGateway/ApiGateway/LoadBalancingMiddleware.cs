@@ -7,11 +7,8 @@ public class LoadBalancingMiddleware(
     RequestDelegate next,
     ILogger<LoadBalancingMiddleware> logger,
     IHttpClientFactory httpClientFactory,
-    IBalancer balancer,
-    IOptions<ServiceDiscoveryOptions> discoveryOptions)
+    IBalancer balancer)
 {
-    private readonly ServiceDiscoveryOptions _discoveryOptions = discoveryOptions.Value;
-
     public async Task InvokeAsync(HttpContext context)
     {
         var path = context.Request.Path.Value?.TrimStart('/') ?? string.Empty;
@@ -27,8 +24,9 @@ public class LoadBalancingMiddleware(
 
         var remainingPath = string.Join('/', segments.Skip(1));
 
-        var discoveryUrl = _discoveryOptions.GetDiscoveryUrl(area);
-        var sdResponse = await GetAvailableServicesAsync(client, discoveryUrl, context.RequestAborted);
+        var sdUrl = Environment.GetEnvironmentVariable("SD_URL") ?? "http://localhost:5100";
+        var requestUrl =  sdUrl + "/services" + $"/{area}";
+        var sdResponse = await GetAvailableServicesAsync(client, requestUrl, context.RequestAborted);
 
         if (sdResponse is null || sdResponse.Services.Count == 0)
         {
@@ -44,12 +42,11 @@ public class LoadBalancingMiddleware(
             await context.Response.WriteAsync("Нет доступных сервисов");
             return;
         }
-
-        // TODO: хардкод
+        
         var targetUri = new UriBuilder
         {
             Scheme = "http",
-            Host = "localhost",
+            Host = selectedService.Host,
             Port = selectedService.Port,
             Path = remainingPath,
             Query = context.Request.QueryString.Value,

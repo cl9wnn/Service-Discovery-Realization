@@ -1,14 +1,14 @@
-using System.Text;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// TODO: Динамически подтягивать порт SD
 builder.Services.AddHttpClient("ServiceRegistry", client =>
 {
-    client.BaseAddress = new Uri("http://localhost:5100"); // Адрес SD
+    var sdUrl = builder.Configuration["SD_URL"] ?? "http://localhost:5100";
+    client.BaseAddress = new Uri(sdUrl);
 });
 
 var app = builder.Build();
@@ -25,12 +25,14 @@ using (var scope = app.Services.CreateScope())
     var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
     var httpClient = httpClientFactory.CreateClient("ServiceRegistry");
     
-    // TODO: Динамически подтягивать порт приложения
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5103";
+    var host = Environment.GetEnvironmentVariable("SERVICE_HOST") ?? "localhost";
     var serviceData = new 
     {
         Id = Guid.NewGuid(),
         Area = "weatherforecast",
-        Port = 5101
+        Port = int.Parse(port),
+        Host = host
     };
     
     try
@@ -54,6 +56,11 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapGet("/health", () => Results.Ok("healthy!"));
+app.MapGet("/health", (ILogger<Program> logger) =>
+{
+    var port = Environment.GetEnvironmentVariable("PORT") ?? "5103";
+    logger.LogInformation($"Запрос отработал на {port}");
+    return Results.Ok("healthy!");
+});
 
 app.Run();
