@@ -29,6 +29,8 @@ public class HealthChecker(
         {
             var client = httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(10);
+            var traceId = Guid.NewGuid();
+            client.DefaultRequestHeaders.Add(AppConstants.CorrelationIdHeader, traceId.ToString());
 
             logger.LogInformation($"Начинается проверка реплики http://{service.Host}:{service.Port}/health");
             var healthCheckUrl = $"http://{service.Host}:{service.Port}/health";

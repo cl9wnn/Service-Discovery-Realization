@@ -9,8 +9,12 @@ public class LoadBalancingMiddleware(
     IHttpClientFactory httpClientFactory,
     IBalancer balancer)
 {
+    private string _correlationId;
+    
     public async Task InvokeAsync(HttpContext context)
     {
+        _correlationId = context.Items[AppConstants.CorrelationIdHeader]!.ToString()!;
+        
         var path = context.Request.Path.Value?.TrimStart('/') ?? string.Empty;
         var segments = path.Split('/');
         var area = segments.FirstOrDefault();
@@ -52,7 +56,7 @@ public class LoadBalancingMiddleware(
             Query = context.Request.QueryString.Value,
         }.Uri;
 
-        logger.LogInformation($"Перенаправление запроса на {targetUri}");
+        logger.LogInformation($"{_correlationId}: Перенаправление запроса на {targetUri}");
 
         await ProxyRequestAsync(client, context, targetUri);
     }
@@ -62,6 +66,7 @@ public class LoadBalancingMiddleware(
     {
         try
         {
+            client.DefaultRequestHeaders.Add(AppConstants.CorrelationIdHeader, _correlationId);
             var response = await client.GetAsync(serviceDiscoveryUrl, cancellationToken);
             response.EnsureSuccessStatusCode();
 
@@ -73,7 +78,7 @@ public class LoadBalancingMiddleware(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Ошибка при получении списка сервисов");
+            logger.LogError(ex, $"{_correlationId}: Ошибка при получении списка сервисов");
             return null;
         }
     }
@@ -92,6 +97,7 @@ public class LoadBalancingMiddleware(
                 requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
             }
 
+            requestMessage.Headers.Add(AppConstants.CorrelationIdHeader, _correlationId);
             if (context.Request.ContentLength > 0)
             {
                 requestMessage.Content = new StreamContent(context.Request.Body);
