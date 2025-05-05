@@ -25,29 +25,29 @@ public class HealthChecker(
 
     private async Task CheckServiceHealthAsync(ServiceInfo service)
     {
+        var traceId = Guid.NewGuid();
         try
         {
             var client = httpClientFactory.CreateClient();
             client.Timeout = TimeSpan.FromSeconds(10);
-            var traceId = Guid.NewGuid();
             client.DefaultRequestHeaders.Add(AppConstants.CorrelationIdHeader, traceId.ToString());
 
-            logger.LogInformation($"Начинается проверка реплики http://{service.Host}:{service.Port}/health");
+            logger.LogInformation($"{traceId}: Начинается проверка реплики http://{service.Host}:{service.Port}/health");
             var healthCheckUrl = $"http://{service.Host}:{service.Port}/health";
             var response = await client.GetAsync(healthCheckUrl);
 
             if (!response.IsSuccessStatusCode)
             {
-                logger.LogWarning($"Сервис {service.Id} на порту {service.Port} неработоспособен. Код: {response.StatusCode}");
+                logger.LogWarning($"{traceId}: Сервис {service.Id} на порту {service.Port} неработоспособен. Код: {response.StatusCode}");
                 await serviceRegistry.UnregisterAsync(service.Id);
             }
 
-            logger.LogInformation($"Сервис {service.Id} на порту {service.Port} успешно работает. Код: {response.StatusCode}");
+            logger.LogInformation($"{traceId}: Сервис {service.Id} на порту {service.Port} успешно работает. Код: {response.StatusCode}");
         }
         catch (Exception ex)
         {
             logger.LogWarning(ex,
-                $"Ошибка проверки работоспособности сервиса {service.Id} на порту {service.Port}");
+                $"{traceId}: Ошибка проверки работоспособности сервиса {service.Id} на порту {service.Port}");
             await serviceRegistry.UnregisterAsync(service.Id);
         }
     }
