@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using TestApp;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,8 @@ using (var scope = app.Services.CreateScope())
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
     var httpClientFactory = scope.ServiceProvider.GetRequiredService<IHttpClientFactory>();
     var httpClient = httpClientFactory.CreateClient("ServiceRegistry");
+    var traceId = Guid.NewGuid();
+    httpClient.DefaultRequestHeaders.Add("X-Correlation-ID", traceId.ToString());
     
     var port = Environment.GetEnvironmentVariable("PORT") ?? "5103";
     var host = Environment.GetEnvironmentVariable("SERVICE_HOST") ?? "localhost";
@@ -41,7 +44,7 @@ using (var scope = app.Services.CreateScope())
         
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError("Ошибка регистрации приложения: {response.StatusCode}", response.StatusCode);
+            logger.LogError($"Ошибка регистрации приложения: {response.StatusCode}");
             Environment.Exit(1);
         }
         else
@@ -56,10 +59,13 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapGet("/health", (ILogger<Program> logger) =>
+app.UseMiddleware<CorrelationIdMiddleware>();
+
+app.MapGet("/health", (HttpContext context, ILogger<Program> logger) =>
 {
+    var traceId = context.Items[AppConstants.CorrelationIdHeader]!;
     var port = Environment.GetEnvironmentVariable("PORT") ?? "5103";
-    logger.LogInformation($"Запрос отработал на {port}");
+    logger.LogInformation($"{traceId}: Запрос отработал на {port}");
     return Results.Ok("healthy!");
 });
 

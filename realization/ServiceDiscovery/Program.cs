@@ -1,5 +1,6 @@
 using API;
 using API.HealthChecker;
+using API.Middlewares;
 using API.ServiceRegistry;
 using Hangfire;
 using Hangfire.MemoryStorage;
@@ -34,6 +35,7 @@ builder.Services.AddHangfire(config => config.UseMemoryStorage());
 builder.Services.AddHangfireServer();
 
 var app = builder.Build();
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseHangfireDashboard();
 
 RecurringJob.AddOrUpdate<IHealthChecker>(
