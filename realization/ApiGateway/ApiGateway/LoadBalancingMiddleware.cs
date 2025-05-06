@@ -56,7 +56,7 @@ public class LoadBalancingMiddleware(
             Query = context.Request.QueryString.Value,
         }.Uri;
 
-        logger.LogInformation($"{_correlationId}: Перенаправление запроса на {targetUri}");
+        logger.LogInformation("{@CorrelationId}: Перенаправление запроса на {TargetUri}", _correlationId, targetUri);
 
         await ProxyRequestAsync(client, context, targetUri);
     }
@@ -78,7 +78,7 @@ public class LoadBalancingMiddleware(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"{_correlationId}: Ошибка при получении списка сервисов");
+            logger.LogError(ex, "{@CorrelationId}: Ошибка при получении списка сервисов", _correlationId);
             return null;
         }
     }

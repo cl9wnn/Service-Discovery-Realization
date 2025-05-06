@@ -23,6 +23,7 @@ services:
     hostname: api-gateway
     depends_on:
       - service-discovery
+      - seq
     ports:
       - "8080:8080"
     environment:
