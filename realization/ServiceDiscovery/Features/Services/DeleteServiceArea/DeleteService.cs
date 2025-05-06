@@ -7,11 +7,13 @@ public class DeleteService
     public static async Task<IResult> Handle(Guid id, HttpContext context, IServiceRegistry registry,
         ILogger<DeleteService> logger)
     {
-        logger.LogInformation("Начало обработки запроса на удаление сервиса.");
+        var correlationId = context.Items[AppConstants.CorrelationIdHeader]!;
+
+        logger.LogInformation($"{correlationId}: Начало обработки запроса на удаление сервиса.");
 
         if (id == Guid.Empty)
         {
-            logger.LogWarning("Некорректный или отсутствующий GUID.");
+            logger.LogWarning($"{correlationId}: Некорректный или отсутствующий GUID.");
             return Results.BadRequest("Некорректный или отсутствующий GUID.");
         }
 
@@ -19,25 +21,25 @@ public class DeleteService
 
         if (service == null)
         {
-            logger.LogWarning("Сервис с таким айди не зарегистрирован!");
+            logger.LogWarning($"{correlationId}: Сервис с таким айди не зарегистрирован!");
             return Results.BadRequest("Сервис с таким айди не зарегистрирован!");
         }
 
-        logger.LogInformation("Запрос успешно прочитан.");
+        logger.LogInformation($"{correlationId}: Запрос успешно прочитан.");
 
         try
         {
-            logger.LogInformation("Удаление реплики...");
+            logger.LogInformation($"{correlationId}: Удаление реплики...");
             await registry.UnregisterAsync(id);
-            logger.LogInformation("Реплика успешно удалена.");
+            logger.LogInformation($"{correlationId}: Реплика успешно удалена.");
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Ошибка при удалении реплики.");
+            logger.LogError(ex, $"{correlationId}: Ошибка при удалении реплики.");
             return Results.StatusCode(500);
         }
 
-        logger.LogInformation("Запрос на удаление реплики успешно обработан.");
+        logger.LogInformation($"{correlationId}: Запрос на удаление реплики успешно обработан.");
         return Results.Ok();
     }
 }
