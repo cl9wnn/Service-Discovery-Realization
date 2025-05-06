@@ -10,10 +10,11 @@ services:
     environment:
       - ASPNETCORE_URLS=http://*:5100
       - PORT=5100
+    depends_on:
+      - seq
+      - redis
     networks:
       - app-network
-    depends_on:
-      - redis
 
   api-gateway:
     build:
@@ -23,12 +24,23 @@ services:
     hostname: api-gateway
     depends_on:
       - service-discovery
+      - seq
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_URLS=http://*:8080
       - PORT=8080
       - SD_URL=http://service-discovery:5100
+    networks:
+      - app-network
+      
+  seq:
+    container_name: seq
+    image: datalust/seq:latest
+    ports:
+      - "5341:80"
+    environment:
+      - ACCEPT_EULA=Y
     networks:
       - app-network
       
@@ -48,6 +60,7 @@ services:
     hostname: weather-service
     depends_on:
       - service-discovery
+      - seq
     ports:
       - "5103:5103"
     environment:
@@ -66,6 +79,7 @@ services:
     hostname: weather-service
     depends_on:
       - service-discovery
+      - seq
     ports:
       - "5104:5104"
     environment:

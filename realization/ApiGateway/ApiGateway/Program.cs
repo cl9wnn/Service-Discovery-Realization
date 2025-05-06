@@ -1,7 +1,9 @@
 using ApiGateway;
+using ApiGateway.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.ConfigureSerilog();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSingleton<IBalancer, RoundRobinBalancer>();
