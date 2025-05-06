@@ -10,7 +10,7 @@ public class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationId
             var correlationId = requestId.ToString();
             context.Items.Add(AppConstants.CorrelationIdHeader, correlationId);
 
-            logger.LogInformation($"Принят запрос {correlationId}");
+            logger.LogInformation("Принят запрос {@correlationId}", correlationId);
             await next(context);
         }
         else

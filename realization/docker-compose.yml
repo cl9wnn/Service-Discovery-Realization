@@ -10,10 +10,11 @@ services:
     environment:
       - ASPNETCORE_URLS=http://*:5100
       - PORT=5100
+    depends_on:
+      - seq
+      - redis
     networks:
       - app-network
-    depends_on:
-      - redis
 
   api-gateway:
     build:

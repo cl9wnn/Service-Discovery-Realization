@@ -14,6 +14,7 @@ builder.Services.AddSingleton<IHealthChecker, HealthChecker>();
 builder.Services.AddMappings();
 builder.Services.AddHttpClient();
 builder.Services.AddLogging();
+builder.ConfigureSerilog();
 
 if (!builder.Environment.IsDevelopment())
 {

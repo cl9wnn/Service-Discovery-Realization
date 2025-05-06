@@ -9,11 +9,11 @@ public class DeleteService
     {
         var correlationId = context.Items[AppConstants.CorrelationIdHeader]!;
 
-        logger.LogInformation($"{correlationId}: Начало обработки запроса на удаление сервиса.");
+        logger.LogInformation("{@correlationId}: Начало обработки запроса на удаление сервиса.", correlationId);
 
         if (id == Guid.Empty)
         {
-            logger.LogWarning($"{correlationId}: Некорректный или отсутствующий GUID.");
+            logger.LogWarning("{@correlationId}: Некорректный или отсутствующий GUID.", correlationId);
             return Results.BadRequest("Некорректный или отсутствующий GUID.");
         }
 
@@ -21,25 +21,25 @@ public class DeleteService
 
         if (service == null)
         {
-            logger.LogWarning($"{correlationId}: Сервис с таким айди не зарегистрирован!");
+            logger.LogWarning("{@correlationId}: Сервис с таким айди не зарегистрирован!", correlationId);
             return Results.BadRequest("Сервис с таким айди не зарегистрирован!");
         }
 
-        logger.LogInformation($"{correlationId}: Запрос успешно прочитан.");
+        logger.LogInformation("{@correlationId}: Запрос успешно прочитан.", correlationId);
 
         try
         {
-            logger.LogInformation($"{correlationId}: Удаление реплики...");
+            logger.LogInformation("{@correlationId}: Удаление реплики...", correlationId);
             await registry.UnregisterAsync(id);
-            logger.LogInformation($"{correlationId}: Реплика успешно удалена.");
+            logger.LogInformation("{@correlationId}: Реплика успешно удалена.", correlationId);
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, $"{correlationId}: Ошибка при удалении реплики.");
+            logger.LogError(ex, "{@correlationId}: Ошибка при удалении реплики.", correlationId);
             return Results.StatusCode(500);
         }
 
-        logger.LogInformation($"{correlationId}: Запрос на удаление реплики успешно обработан.");
+        logger.LogInformation("{@correlationId}: Запрос на удаление реплики успешно обработан.", correlationId);
         return Results.Ok();
     }
 }
