@@ -1,10 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using TestApp;
+using TestApp.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.ConfigureSerilog();
 
 builder.Services.AddHttpClient("ServiceRegistry", client =>
 {
@@ -44,7 +46,7 @@ using (var scope = app.Services.CreateScope())
         
         if (!response.IsSuccessStatusCode)
         {
-            logger.LogError($"Ошибка регистрации приложения: {response.StatusCode}");
+            logger.LogError("Ошибка регистрации приложения: {@StatusCode}", response.StatusCode);
             Environment.Exit(1);
         }
         else
@@ -65,7 +67,7 @@ app.MapGet("/health", (HttpContext context, ILogger<Program> logger) =>
 {
     var traceId = context.Items[AppConstants.CorrelationIdHeader]!;
     var port = Environment.GetEnvironmentVariable("PORT") ?? "5103";
-    logger.LogInformation($"{traceId}: Запрос отработал на {port}");
+    logger.LogInformation("{@TraceId}: Запрос отработал на {@Port}", traceId, port);
     return Results.Ok("healthy!");
 });
 
