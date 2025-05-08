@@ -1,5 +1,5 @@
-const AREA = 'weatherforecast'; 
-const API_BASE = `/services/${AREA}`; 
+const AREA = 'weatherforecast';
+const API_BASE = `/services/${AREA}`;
 const CORRELATION_ID = crypto.randomUUID();
 
 async function fetchServices() {
@@ -13,13 +13,13 @@ async function fetchServices() {
         if (!response.ok) throw new Error(await response.text());
 
         const data = await response.json();
+        hideError(); 
         return data.services || [];
     } catch (err) {
-        alert('Ошибка при загрузке сервисов: ' + err.message);
+        showError(err.message);
         return [];
     }
 }
-
 async function unregisterService(id) {
     try {
         const response = await fetch(`/services/${id}`, {
@@ -31,13 +31,37 @@ async function unregisterService(id) {
 
         if (!response.ok) throw new Error(await response.text());
     } catch (err) {
-        alert(`Ошибка при удалении сервиса: ${err.message}`);
+        alert(`Ошибка при отключении сервиса: ${err.message}`);
+    }
+}
+
+async function registerService(service) {
+    try {
+        const requestBody = {
+            ...service,
+            area: AREA 
+        };
+
+        const response = await fetch(`/services`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Correlation-Id': CORRELATION_ID
+            },
+            body: JSON.stringify(requestBody)
+        });
+
+        console.log(JSON.stringify(requestBody));
+
+        if (!response.ok) throw new Error(await response.text());
+    } catch (err) {
+        alert(`Ошибка при включении сервиса: ${err.message}`);
     }
 }
 
 async function renderServices() {
     const tbody = document.getElementById('serviceList');
-    tbody.innerHTML = ''; 
+    tbody.innerHTML = '';
 
     const services = await fetchServices();
 
@@ -45,20 +69,26 @@ async function renderServices() {
         const row = document.createElement('tr');
 
         const nameCell = document.createElement('td');
-        nameCell.textContent = `${service.host}:${service.port}`;
+        nameCell.textContent = `${service.host}:${service.port}:${service.id}`;
         row.appendChild(nameCell);
 
         const statusCell = document.createElement('td');
-        statusCell.innerHTML = `<span class="online">✅ Registered</span>`;
+        statusCell.innerHTML = service.isHealthy
+            ? '<span class="online">✅ Registered</span>'
+            : '<span class="offline">❌ Unregistered</span>';
         row.appendChild(statusCell);
 
         const actionCell = document.createElement('td');
         const toggleBtn = document.createElement('button');
-        toggleBtn.className = 'toggle unregister';
-        toggleBtn.textContent = 'Unregister';
+        toggleBtn.className = 'toggle';
+        toggleBtn.textContent = service.isHealthy ? 'Unregister' : 'Register';
 
         toggleBtn.onclick = async () => {
-            await unregisterService(service.id);
+            if (service.isHealthy) {
+                await unregisterService(service.id);
+            } else {
+                await registerService(service);
+            }
             await renderServices();
         };
 
@@ -70,3 +100,19 @@ async function renderServices() {
 }
 
 renderServices();
+
+function showError(message) {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+
+    document.getElementById('serviceTable').style.display = 'none';
+}
+
+function hideError() {
+    const errorDiv = document.getElementById('errorMessage');
+    errorDiv.style.display = 'none';
+
+    document.getElementById('serviceTable').style.display = 'table';
+}
+

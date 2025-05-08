@@ -24,6 +24,7 @@ public class AddService
         logger.LogInformation("{@correlationId}: Запрос успешно прочитан.", correlationId);
 
         var service = mapper.Map<ServiceInfo>(request);
+        service.IsHealthy = true;
 
         try
         {

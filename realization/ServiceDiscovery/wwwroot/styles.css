@@ -62,3 +62,14 @@ button.unregister {
     background-color: #dc3545;
     color: white;
 }
+
+.error-message {
+    padding: 10px;
+    background-color: #ffefef;
+    color: #cc0000;
+    border: 1px solid #cc0000;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    text-align: center;
+    font-weight: bold;
+}

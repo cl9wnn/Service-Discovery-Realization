@@ -71,10 +71,24 @@ public class LoadBalancingMiddleware(
             response.EnsureSuccessStatusCode();
 
             var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
-            return JsonSerializer.Deserialize<ServiceDiscoveryResponse>(responseBody, new JsonSerializerOptions
+            var responseServices = JsonSerializer.Deserialize<ServiceDiscoveryResponse>(responseBody, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });
+            
+            if (responseServices?.Services == null)
+            {
+                return null;
+            }
+            
+            var healthyServices = responseServices.Services
+                .Where(s => s.IsHealthy)
+                .ToList();
+            
+            return new ServiceDiscoveryResponse
+            {
+                Services = healthyServices,
+            };
         }
         catch (Exception ex)
         {

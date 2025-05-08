@@ -12,6 +12,8 @@ public class RedisServiceRegistry(IConnectionMultiplexer redis) : IServiceRegist
     public async Task RegisterAsync(ServiceInfo service)
     {
         var key = $"{KeyPrefix}{service.Id}";
+        service.IsHealthy = true;
+
         var oldJson = await _db.StringGetAsync(key);
         if (!oldJson.IsNullOrEmpty)
         {
@@ -87,9 +89,10 @@ public class RedisServiceRegistry(IConnectionMultiplexer redis) : IServiceRegist
             return false;
         }
 
-        await _db.KeyDeleteAsync(key);
-        await _db.SetRemoveAsync("service_registry:all_ids", id.ToString());
-        await _db.SetRemoveAsync($"area:{service.Area}", id.ToString());
+        service.IsHealthy = false;
+        var updatedJson = JsonSerializer.Serialize(service);
+        await _db.StringSetAsync(key, updatedJson);
+
         return true;
     }
 
