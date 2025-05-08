@@ -36,6 +36,9 @@ builder.Services.AddHangfire(config => config.UseMemoryStorage());
 builder.Services.AddHangfireServer();
 
 var app = builder.Build();
+
+app.UseGlobalExceptionHandler();
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseHangfireDashboard();
 
@@ -52,6 +55,7 @@ app.MapGroup("/services")
     .MapServicesApi()
     .WithTags("Public");
 
-app.UseGlobalExceptionHandler();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 app.Run();
