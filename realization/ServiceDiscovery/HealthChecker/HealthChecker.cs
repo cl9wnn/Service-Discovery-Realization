@@ -39,7 +39,7 @@ public class HealthChecker(
             if (!response.IsSuccessStatusCode)
             {
                 logger.LogWarning("{@TraceId}: Сервис {@Id} на порту {@Port} неработоспособен. Код: {@StatusCode}", traceId, service.Id, service.Port, response.StatusCode);
-                await serviceRegistry.UnregisterAsync(service.Id);
+                await serviceRegistry.DeleteAsync(service.Id);
             }
 
             logger.LogInformation("{@TraceId}: Сервис {@Id} на порту {@Port} успешно работает. Код: {@StatusCode}", traceId, service.Id, service.Port, response.StatusCode);
@@ -48,7 +48,7 @@ public class HealthChecker(
         {
             logger.LogWarning(ex,"{TraceId}: Ошибка проверки работоспособности сервиса {Id} на порту {Port}", traceId, service.Id, service.Port);
 
-            await serviceRegistry.UnregisterAsync(service.Id);
+            await serviceRegistry.DeleteAsync(service.Id);
         }
     }
 }

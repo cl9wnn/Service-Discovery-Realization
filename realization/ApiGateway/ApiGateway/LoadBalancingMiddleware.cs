@@ -34,6 +34,7 @@ public class LoadBalancingMiddleware(
 
         if (sdResponse is null || sdResponse.Services.Count == 0)
         {
+            context.Response.ContentType = "text/plain;charset=utf-8";
             context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             await context.Response.WriteAsync("Нет доступных сервисов");
             return;
@@ -42,6 +43,7 @@ public class LoadBalancingMiddleware(
         var selectedService = balancer.GetNextService(sdResponse.Services);
         if (selectedService is null)
         {
+            context.Response.ContentType = "text/plain;charset=utf-8";
             context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
             await context.Response.WriteAsync("Нет доступных сервисов");
             return;
@@ -129,6 +131,7 @@ public class LoadBalancingMiddleware(
         }
         catch (Exception ex)
         {
+            context.Response.ContentType = "text/plain;charset=utf-8";
             context.Response.StatusCode = StatusCodes.Status502BadGateway;
             await context.Response.WriteAsync($"{ex.Message}");
         }

@@ -57,6 +57,29 @@ public class InMemoryServiceRegistry : IServiceRegistry
         return Task.FromResult(false);
     }
 
+    public Task<bool> DeleteAsync(Guid id)
+    {
+        foreach (var area in _services.Values)
+        {
+            if (!area.TryRemove(id, out _))
+            {
+                continue;
+            }
+
+            if (!area.IsEmpty)
+            {
+                return Task.FromResult(true);
+            }
+
+            var areaName = _services.FirstOrDefault(x => x.Value == area).Key;
+            _services.TryRemove(areaName, out _);
+
+            return Task.FromResult(true);
+        }
+
+        return Task.FromResult(false);
+    }
+
     public Task<bool> UpdateAsync(ServiceInfo service)
     {
         if (!_services.TryGetValue(service.Area, out var areaServices))

@@ -11,6 +11,7 @@ public interface IServiceRegistry
     Task<ICollection<ServiceInfo>> GetAllAsync();
 
     Task<bool> UnregisterAsync(Guid id);
+    Task<bool> DeleteAsync(Guid id);
 
     Task<bool> UpdateAsync(ServiceInfo service);
 
