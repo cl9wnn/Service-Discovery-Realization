@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
@@ -36,7 +37,7 @@ public class LoadBalancingMiddleware(
         {
             context.Response.ContentType = "text/plain;charset=utf-8";
             context.Response.StatusCode = StatusCodes.Status503ServiceUnavailable;
-            await context.Response.WriteAsync("Нет доступных сервисов");
+            await context.Response.WriteAsync($"Нет доступных сервисов в области \"{area}\"");
             return;
         }
 
@@ -103,10 +104,11 @@ public class LoadBalancingMiddleware(
     {
         try
         {
-            var requestMessage = new HttpRequestMessage();
-
-            requestMessage.RequestUri = targetUri;
-            requestMessage.Method = new HttpMethod(context.Request.Method);
+            var requestMessage = new HttpRequestMessage
+            {
+                RequestUri = targetUri,
+                Method = new HttpMethod(context.Request.Method)
+            };
 
             foreach (var header in context.Request.Headers)
             {
@@ -126,6 +128,16 @@ public class LoadBalancingMiddleware(
             using var responseMessage = await client.SendAsync(
                 requestMessage, HttpCompletionOption.ResponseHeadersRead, context.RequestAborted);
 
+            if (responseMessage.StatusCode == HttpStatusCode.NotFound)
+            {
+                logger.LogWarning("{@TraceId}: Целевой сервис не поддерживает путь {@TargetUri} (404)", _correlationId, targetUri);
+                context.Response.StatusCode = StatusCodes.Status404NotFound;
+                context.Response.ContentType = "text/plain;charset=utf-8";
+                await context.Response.WriteAsync("Маршрут не найден в целевом сервисе");
+                return;
+            }
+            context.Response.StatusCode = (int)responseMessage.StatusCode;
+            
             await using var responseStream = await responseMessage.Content.ReadAsStreamAsync();
             await responseStream.CopyToAsync(context.Response.Body, context.RequestAborted);
         }
