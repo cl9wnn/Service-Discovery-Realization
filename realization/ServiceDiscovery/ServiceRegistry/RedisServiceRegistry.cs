@@ -12,6 +12,8 @@ public class RedisServiceRegistry(IConnectionMultiplexer redis) : IServiceRegist
     public async Task RegisterAsync(ServiceInfo service)
     {
         var key = $"{KeyPrefix}{service.Id}";
+        service.IsHealthy = true;
+
         var oldJson = await _db.StringGetAsync(key);
         if (!oldJson.IsNullOrEmpty)
         {
@@ -73,6 +75,28 @@ public class RedisServiceRegistry(IConnectionMultiplexer redis) : IServiceRegist
     }
 
     public async Task<bool> UnregisterAsync(Guid id)
+    {
+        var key = $"{KeyPrefix}{id}";
+        var json = await _db.StringGetAsync(key);
+        if (json.IsNullOrEmpty)
+        {
+            return false;
+        }
+
+        var service = JsonSerializer.Deserialize<ServiceInfo>(json!);
+        if (service == null)
+        {
+            return false;
+        }
+
+        service.IsHealthy = false;
+        var updatedJson = JsonSerializer.Serialize(service);
+        await _db.StringSetAsync(key, updatedJson);
+
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(Guid id)
     {
         var key = $"{KeyPrefix}{id}";
         var json = await _db.StringGetAsync(key);

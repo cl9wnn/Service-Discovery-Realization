@@ -16,7 +16,8 @@ public class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationId
         else
         {
             logger.LogWarning("Отсутствует traceId. Ответ: 404");
-        
+            
+            context.Response.ContentType = "text/plain;charset=utf-8";
             context.Response.StatusCode = StatusCodes.Status404NotFound;
             await context.Response.WriteAsync("TraceId не найден");
         }

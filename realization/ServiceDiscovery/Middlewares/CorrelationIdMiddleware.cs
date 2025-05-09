@@ -11,11 +11,12 @@ public class CorrelationIdMiddleware(RequestDelegate next, ILogger<CorrelationId
             context.Items.Add(AppConstants.CorrelationIdHeader, correlationId);
 
             logger.LogInformation("Принят запрос {@correlationId}", correlationId);
-            await next(context);
         }
         else
         {
             logger.LogInformation("Отсутствует traceId. Выход");
         }
+
+        await next(context);
     }
 }
